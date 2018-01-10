@@ -1,0 +1,4 @@
+---
+admin_user_pass: some_crypted_password
+normal_user_pass: some_other_crypted_password
+admin_mail: yourmail@example.com

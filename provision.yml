@@ -1,0 +1,156 @@
+---
+- hosts: servers
+  remote_user: root
+  gather_facts: false
+  tasks:
+    - name: install python for ansible
+      raw: "pacman -Syy --noconfirm python"
+      changed_when: false
+
+
+- hosts: servers
+  remote_user: root
+
+  vars:
+    cron_pacman_log: /var/log/cron-pacman.log
+    normal_user_name: mu
+    dotfiles_url: https://github.com/Boreeas/.dotfiles.git
+
+  tasks:
+    - name: set hostname
+      hostname: name={{ hostname }}
+
+    - name: set hostname permanently
+      template:
+        src: files/hostname.j2
+        dest: /etc/hostname
+
+    - name: set timezone
+      timezone: name=Europe/Berlin
+
+    - name: enable ntp
+      shell: timedatectl set-ntp true
+      notify:
+        - restart cron
+
+    - name: render locale config
+      template:
+        src: files/locale.gen
+        dest: /etc/locale.gen
+
+    - name: generate locales
+      shell: locale-gen
+
+    - name: configure locale
+      shell: localectl set-locale LANG=en_us.UTF-8 LC_TIME=de_DE.UTF-8 LC_COLLATE=C
+
+    - name: upgrade packages
+      pacman:
+        update_cache: yes
+        upgrade: yes
+
+    - name: install necessary packages
+      pacman:
+        pkg: "{{ item }}"
+        state: present
+      with_items:
+        - zsh
+        - termite-terminfo
+        - cronie
+        - git
+        - sudo
+
+    - name: enable wheel group
+      template:
+        src: files/sudo_wheel
+        dest: /etc/sudoers.d/wheel
+
+    - name: "cron: set MAILTO"
+      cron:
+        env: yes
+        name: MAILTO
+        value: "{{ admin_mail }}"
+
+    - name: enable pacman auto-updates
+      cron:
+        name: pacman auto-updates
+        hour: 0
+        minute: 0
+        job: "(echo; date; pacman -Syyu --quiet --noconfirm) &>>{{ cron_pacman_log }} || (echo 'cron-pacman: update failed!'; tail {{ cron_pacman_log }}; false)"
+
+    - name: populate /etc/skel
+      git:
+        repo: "{{ dotfiles_url }}"
+        dest: /etc/skel/.dotfiles
+
+    - name: enable zsh for root
+      shell: cp -r /etc/skel/.dotfiles /root/.dotfiles && /root/.dotfiles/script/bootstrap
+      args:
+        executable: /bin/bash
+        creates: /root/.zshrc
+        stdin: |
+            root
+            {{ admin_mail }}
+
+    - name: set root password
+      user:
+        name: root
+        password: "{{ root_pass }}"
+
+    - name: set root shell to zsh
+      user:
+        name: root
+        shell: /bin/zsh
+
+    - name: create normal user
+      user:
+        name: "{{ normal_user_name }}"
+        groups:
+          - wheel
+        append: yes
+        shell: /bin/zsh
+        password: "{{ normal_user_pass }}"
+
+    - name: configure zsh
+      become: yes
+      become_user: "{{ normal_user_name }}"
+      shell: ./script/bootstrap
+      args:
+        chdir: .dotfiles
+        executable: /bin/bash
+        creates: ~/.zshrc
+        stdin: |
+          {{ normal_user_name }}
+          {{ admin_mail }}
+
+    - name: set authorized keys for root
+      authorized_key:
+        user: root
+        key: "{{ item }}"
+      with_file: files/authorized_keys
+
+    - name: set authorized_keys for {{ normal_user_name }}
+      become: yes
+      become_user: "{{ normal_user_name }}"
+      authorized_key:
+        user: "{{ normal_user_name }}"
+        key: "{{ item }}"
+      with_file: files/authorized_keys
+
+    - name: configure ssh
+      template:
+        src: files/sshd_config.j2
+        dest: /etc/ssh/sshd_config
+      notify:
+        - restart sshd
+
+  handlers:
+    - name: restart sshd
+      service:
+        name: sshd
+        state: restarted
+    - name: restart cron
+      service:
+        name: cronie
+        state: restarted
+

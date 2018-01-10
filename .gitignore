@@ -1,0 +1,4 @@
+*.retry
+*.secret
+host_vars/*
+!host_vars/template
