@@ -1,0 +1,31 @@
+<VirtualHost *:80>
+    ServerName {{ vhost }}.{{ host }}
+    RedirectMatch permanent "^/((?!\.well-known/acme-challenge/).*)" https://{{ vhost }}.{{ host }}/$1
+    Alias /.well-known/acme-challenge /srv/http/challenges
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName {{ vhost }}.{{ host }}
+    DocumentRoot /srv/http/{{ root_dir }}
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/{{ vhost }}.{{ host }}.crt
+    SSLCertificateKeyFile /etc/ssl/{{ vhost }}.{{ host }}.key
+    ErrorLog "/var/log/httpd/error_{{ vhost }}.log"
+    CustomLog "/var/log/httpd/access_{{ vhost }}.log" common
+
+    {{ additional_settings }}
+
+    Alias /.well-known/acme-challenge /srv/http/challenges
+
+    <Directory /srv/http/{{ root_dir }}>
+        Options {{ options }}
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    <Directory /srv/http/challenges>
+        Options None
+        AllowOverride None
+        Require all granted
+    </Directory>
+</VirtualHost>

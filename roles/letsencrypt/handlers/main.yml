@@ -1,0 +1,5 @@
+---
+- name: request new certs
+  command: /etc/lets-encrypt/letsencrypt-renew.sh
+  notify:
+    - reload apache

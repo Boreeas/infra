@@ -1,0 +1,15 @@
+---
+- hosts: servers
+  user: root
+  vars:
+    znc_user: znc
+  roles:
+    - name: letsencrypt
+      do_setup: true
+    - role: apache2
+      host: "{{ dns }}"
+      mail: "{{ admin_mail }}"
+    - role: make_user
+      user: "{{ znc_user }}"
+      password: "{{ znc_user_pass }}"
+      mail: "{{ admin_mail }}"

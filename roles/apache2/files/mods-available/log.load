@@ -1,0 +1,1 @@
+LoadModule log_module modules/mod_log.so

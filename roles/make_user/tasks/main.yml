@@ -1,0 +1,28 @@
+---
+- name: create user {{ user }}
+  become: yes
+  user:
+    name: "{{ user }}"
+    password: "{{ password }}"
+    shell: /bin/zsh
+
+- name: configure zsh
+  become: yes
+  become_user: "{{ user }}"
+  shell: ./script/bootstrap
+  args:
+    chdir: .dotfiles
+    executable: /bin/bash
+    creates: ~/.zshrc
+    stdin: |
+      {{ user }}
+      {{ mail }}
+
+- name: set authorized keys for {{ user }}
+  become: yes
+  become_user: "{{ user }}"
+  authorized_key:
+    user: "{{ user }}"
+    key: "{{ item }}"
+  with_file: files/authorized_keys
+

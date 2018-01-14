@@ -1,0 +1,57 @@
+---
+- name: install dependencies
+  pacman:
+    name: openssl
+    state: present
+
+- name: create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - /etc/lets-encrypt
+
+- name: create files
+  file:
+    path: /etc/lets-encrypt/{{ item }}
+    state: touch
+  with_items:
+    - services
+    - domains
+
+- name: request lets-encrypt root cert
+  get_url:
+    url: https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem.txt
+    dest: /etc/lets-encrypt/lets-encrypt-x3.crt
+
+- name: generate lets-encrypt auth key
+  shell: openssl genrsa 4096 > /etc/lets-encrypt/account.key
+  args:
+    creates: /etc/lets-encrypt/account.key
+
+- name: protect lets-encrypt auth key
+  file:
+    path: /etc/lets-encrypt/account.key
+    mode: 600
+
+- name: upload scripts
+  copy:
+    src: "{{ item }}"
+    dest: /etc/lets-encrypt/{{ item }}
+    mode: u=rwx,g=r,o=r
+  with_items:
+    - letsencrypt-renew.sh
+    - acme_tiny.py
+
+- name: setup cron job
+  cron:
+    name: lets-encrypt renewal
+    day: 1
+    hour: 2
+    minute: 34
+    job: "(cd /etc/lets-encrypt; ./letsencrypt-renew.sh) &>>/var/log/lets-encrypt || (echo 'lets-encrypt: renewal failed!'; tail /var/log/lets-encrypt; false)"
+
+- name: create ssl group
+  group:
+    name: ssl
+    state: present

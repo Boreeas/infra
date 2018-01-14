@@ -1,4 +1,8 @@
 *.retry
 *.secret
+
+# Ignore host vars (sensitive information go here)
 host_vars/*
 !host_vars/template
+
+

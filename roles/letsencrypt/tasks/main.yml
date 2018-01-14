@@ -1,0 +1,6 @@
+---
+- import_tasks: setup.yml
+  when: do_setup
+
+- import_tasks: request.yml
+  when: not do_setup

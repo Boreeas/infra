@@ -52,13 +52,15 @@
     - name: install necessary packages
       pacman:
         pkg: "{{ item }}"
-        state: present
+        state: latest
       with_items:
         - zsh
         - termite-terminfo
         - cronie
         - git
         - sudo
+        - rsync
+        - strace
 
     - name: enable wheel group
       template:
@@ -149,8 +151,10 @@
       service:
         name: sshd
         state: restarted
+        enabled: yes
     - name: restart cron
       service:
         name: cronie
         state: restarted
+        enabled: yes
 
