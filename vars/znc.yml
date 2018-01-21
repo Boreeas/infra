@@ -1,0 +1,93 @@
+---
+znc_listeners:
+  - port: 9001
+  - port: 9002
+  - port: 9003
+  - port: 9004
+  - port: 9005
+  - port: 9006
+  - port: 9007
+  - port: 9008
+  - port: 9009
+znc_modules:
+  - modpython
+  - modperl
+  - partyline
+  - adminlog
+znc_settings:
+  - MaxBufferSize = 500
+znc_users:
+  - name: mu
+    admin: true
+    altname: nu
+    realname: hell if i know
+    modules:
+      - chansaver
+      - controlpanel
+      - flooddetach
+      - log
+      - send_raw
+    settings:
+      - Buffer = 500
+      - CTCPReply = VERSION telnet v1.9.4
+      - QuitMsg = User terminated
+    networks:
+      - name: rizon
+        address: irc.rizon.net
+        port: 6697
+        ssl: yes
+        modules:
+          - autocycle
+          - nickserv
+          - route_replies
+      - name: veekun
+        address: irc.veekun.com
+        port: 6697
+        ssl: yes
+        modules:
+          - autocycle
+          - nickserv
+          - route_replies
+      - name: freenode
+        address: chat.freenode.net
+        port: 6697
+        ssl: yes
+        modules:
+          - autocycle
+          - nickserv
+          - route_replies
+        settings:
+          - Nick = Boreeas
+          - AltNick = Boreeas_
+      - name: moznet
+        address: irc.mozilla.org
+        port: 6697
+        ssl: yes
+        modules:
+          - autocycle
+          - nickserv
+          - route_replies
+      - name: quakenet
+        address: irc.quakenet.org
+        port: 6697
+        ssl: yes
+        modules:
+          - autocycle
+          - q
+          - route_replies
+      - name: hackint
+        address: irc.hackint.org
+        port: 6697
+        ssl: yes
+        modules:
+          - autocycle
+          - nickserv
+          - route_replies
+      - name: parahumans
+        address: irc.parahumans.net
+        port: 6697
+        ssl: yes
+        modules:
+          - autocycle
+          - nickserv
+          - route_replies

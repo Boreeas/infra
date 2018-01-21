@@ -3,13 +3,20 @@
   user: root
   vars:
     znc_user: znc
+  vars_files:
+    - vars/znc.yml
+    - vars/znc-pass.yml
   roles:
     - name: letsencrypt
       do_setup: true
+      tags:
+        - letsencrypt
     - role: apache2
       host: "{{ dns }}"
       mail: "{{ admin_mail }}"
-    - role: make_user
-      user: "{{ znc_user }}"
-      password: "{{ znc_user_pass }}"
-      mail: "{{ admin_mail }}"
+      tags:
+        - apache2
+    - role: znc
+      znc_host: "irc.{{ dns }}"
+      tags:
+        - znc

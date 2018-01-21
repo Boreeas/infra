@@ -67,5 +67,5 @@ else
 fi
 
 while read service; do
-    systemctl reload $service
+    systemctl restart $service
 done < "/etc/lets-encrypt/services"

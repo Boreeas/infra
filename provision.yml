@@ -42,7 +42,7 @@
       shell: locale-gen
 
     - name: configure locale
-      shell: localectl set-locale LANG=en_us.UTF-8 LC_TIME=de_DE.UTF-8 LC_COLLATE=C
+      shell: localectl set-locale LANG=en_us.UTF-8 LC_TIME=de_DE.UTF-8 LC_COLLATE=C LC_CTYPE=en_US.UTF-8 LC_NUMERIC=en_US.UTF-8 LC_MONETARY=en_US.UTF-8 LC_MESSAGES=en_US.UTF-8 LC_PAPER=en_US.UTF-8 LC_NAME=en_US.UTF-8 LC_ADDRESS=en_US.UTF-8 LC_TELEPHONE=en_US.UTF-8 LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=en_US.UTF-8
 
     - name: upgrade packages
       pacman:
@@ -61,11 +61,18 @@
         - sudo
         - rsync
         - strace
+        - htop
+        - lsof
 
-    - name: enable wheel group
+    - name: "sudo: enable wheel group"
       template:
         src: files/sudo_wheel
         dest: /etc/sudoers.d/wheel
+
+    - name: "sudo: disable lecture"
+      copy:
+        src: files/sudo_privacy
+        dest: /etc/sudoers.d/privacy
 
     - name: "cron: set MAILTO"
       cron:

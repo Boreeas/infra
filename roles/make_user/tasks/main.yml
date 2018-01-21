@@ -5,6 +5,8 @@
     name: "{{ user }}"
     password: "{{ password }}"
     shell: /bin/zsh
+    groups: "{{ ugroups }}"
+    append: true
 
 - name: configure zsh
   become: yes

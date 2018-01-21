@@ -1,0 +1,1 @@
+aurman      ALL = NOPASSWD: /usr/bin/pacman

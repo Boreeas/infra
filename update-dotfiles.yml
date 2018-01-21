@@ -1,0 +1,25 @@
+---
+- hosts: servers
+  user: root
+  tasks:
+    - name: update /etc/skel
+      shell: git pull
+      args:
+        chdir: /etc/skel/.dotfiles
+
+    - name: update root
+      shell: git pull && ./script/bootstrap
+      args:
+        chdir: /root/.dotfiles
+
+    - name: query users
+      shell: ls -1 /home
+      register: home_dirs
+
+    - name: update users
+      become: yes
+      become_user: "{{ item }}"
+      shell: git pull && ./script/bootstrap
+      args:
+        chdir: /home/{{ item }}/.dotfiles
+      with_items: "{{ home_dirs.stdout_lines }}"

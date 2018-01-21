@@ -1,0 +1,92 @@
+---
+- name: create znc user
+  include_role:
+    name: make_user
+  vars:
+    user: znc
+    password: "{{ znc_user_pass }}"
+    mail: "{{ admin_mail }}"
+    ugroups:
+      - ssl
+
+- name: install znc dependencies
+  pacman:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - tcl
+    - python
+    - perl
+    - cyrus-sasl
+    - yajl
+
+- name: New user for AUR management
+  user:
+    name: aurman
+    comment: "AUR manager"
+    shell: /bin/nologin
+    home: /var/lib/aurman
+    system: yes
+    state: present
+
+- name: enable passwordless pacman for aurman
+  copy:
+    src: sudo_aurman
+    dest: /etc/sudoers.d/999-aurman
+
+- name: install gpg keys for aur packages
+  become: yes
+  become_user: aurman
+  command: gpg --recv-keys {{ item }}
+  with_items:
+    - 487EACC08557AD082088DABA1EB2638FF56C0C53
+
+- name: install cower
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl"
+  aur:
+    name: cower
+    user: aurman
+
+- name: install znc
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl"
+  aur:
+    name: znc-git
+    user: aurman
+
+- name: make sure znc is stopped
+  service:
+    name: znc
+    state: stopped
+
+- name: configure znc
+  become: yes
+  become_user: znc
+  template:
+    src: znc.conf.j2
+    dest: ~/.znc/configs/znc.conf
+
+- name: request cert
+  include_role:
+    name: letsencrypt
+  vars:
+    domain: "{{ znc_host }}"
+
+- name: register znc for reload on cert renewal
+  lineinfile:
+    path: /etc/lets-encrypt/services
+    line: znc
+
+- name: generate dhparams
+  become: yes
+  become_user: znc
+  command: openssl dhparam -out ~/.znc/znc.pem 4096
+  args:
+    creates: ~/.znc/znc.pem
+
+- name: start znc
+  service:
+    name: znc
+    state: started
+    enabled: yes

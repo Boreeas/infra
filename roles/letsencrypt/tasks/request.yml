@@ -1,6 +1,6 @@
 ---
-- name: generate initial self-signed key pair
-  command: openssl genrsa 4096 > /etc/ssl/{{ domain }}key
+- name: generate private key
+  shell: openssl genrsa 4096 > /etc/ssl/{{ domain }}.key
   args:
     creates: /etc/ssl/{{ domain }}.key
 
