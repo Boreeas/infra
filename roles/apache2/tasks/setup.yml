@@ -1,0 +1,141 @@
+---
+- name: install apache
+  pacman:
+    pkg: apache
+    state: latest
+  notify:
+    - restart apache
+
+- name: register httpd to be reloaded on cert renewal
+  lineinfile:
+    path: /etc/lets-encrypt/services
+    line: httpd
+
+- name: create challenge dir
+  file:
+    path: /srv/http/challenges
+    state: directory
+    owner: http
+    group: http
+
+- name: add user to ssl group
+  user:
+    name: http
+    groups: ssl
+    append: yes
+
+- name: create sites-available/sites-enabled/mods-available/mods-enabled
+  file:
+    path: /etc/httpd/conf/{{ item }}
+    state: directory
+  with_items:
+    - sites-available
+    - sites-enabled
+    - mods-available
+    - mods-enabled
+
+- name: create mods-available entries
+  synchronize:
+    src: mods-available
+    dest: /etc/httpd/conf
+
+- name: create a2ensite/a2dissite/a2enmod/a2dismod
+  copy:
+    src: a2ctl
+    dest: /usr/bin/{{ item }}
+    mode: +x
+  with_items:
+    - a2ensite
+    - a2dissite
+    - a2enmod
+    - a2dismod
+
+- name: enable default modules (as provided by arch's default httpd conf)
+  command: a2enmod {{ item }}
+  args:
+    creates: /etc/httpd/conf/mods-enabled/{{ item }}.load
+  with_items:
+    - mpm_event
+    - authn_file
+    - authn_core
+    - authz_host
+    - authz_groupfile
+    - authz_user
+    - authz_core
+    - access_compat
+    - auth_basic
+    - reqtimeout
+    - include
+    - filter
+    - mime
+    - log_config
+    - env
+    - headers
+    - setenvif
+    - version
+    - slotmem_shm
+    - unixd
+    - status
+    - autoindex
+    - negotiation
+    - dir
+    - userdir
+    - alias
+  notify:
+    - reload apache
+
+- name: enable more modules
+  command: a2enmod {{ item }}
+  args:
+    creates: /etc/httpd/conf/mods-enabled/{{ item }}.load
+  with_items:
+    - rewrite
+    - ssl
+    - http2
+    - socache_shmcb
+  notify:
+    - reload apache
+
+- name: create httpd conf
+  template:
+    src: httpd.conf.j2
+    dest: /etc/httpd/conf/httpd.conf
+  notify:
+    - reload apache
+
+- name: create default vhost
+  template:
+    src: vhost.conf.j2
+    dest: /etc/httpd/conf/sites-available/default
+  vars:
+    vhost: www
+    root_dir: www
+    options: None
+    aliases:
+      - "{{ host }}"
+  notify:
+    - reload apache
+
+- name: create default webroot
+  file:
+    path: /srv/http/www
+    state: directory
+    owner: http
+    group: http
+
+- name: request a certificate
+  include_role:
+    name: letsencrypt
+  vars:
+    domain: www.{{ host }}
+    aliases:
+      - "{{ host }}"
+
+- name: enable default vhost
+  command: a2ensite 000-default
+  args:
+    creates: /etc/httpd/conf/sites-enabled/000-default
+  notify:
+    - reload apache
+
+

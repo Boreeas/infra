@@ -1,0 +1,36 @@
+---
+- name: "create vhost config: {{ vhost }}"
+  template:
+    src: vhost.conf.j2
+    dest: /etc/httpd/conf/sites-available/{{ vhost }}
+  notify:
+    - reload apache
+
+- name: create webroot
+  file:
+    path: "{{ root_path }}"
+    state: directory
+    owner: http
+    group: http
+  when: root_path is defined
+
+- name: create webroot
+  file:
+    path: /srv/http/{{ root_dir }}
+    state: directory
+    owner: http
+    group: http
+  when: root_path is not defined
+
+- name: request a certificate
+  include_role:
+    name: letsencrypt
+  vars:
+    domain: "{{ vhost }}.{{ host }}"
+
+- name: "enable vhost: {{ vhost }}"
+  command: a2ensite {{ vhost }}
+  args:
+    creates: /etc/httpd/conf/sites-enabled/{{ vhost }}
+  notify:
+    - reload apache

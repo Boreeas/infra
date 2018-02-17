@@ -6,21 +6,30 @@
 
 <VirtualHost *:443>
     ServerName {{ vhost }}.{{ host }}
-    DocumentRoot /srv/http/{{ root_dir }}
+    DocumentRoot {% if root_path is defined %}{{ root_path }}{% else %}/srv/http/{{ root_dir }}{% endif %}
+
     SSLEngine on
     SSLCertificateFile /etc/ssl/{{ vhost }}.{{ host }}.crt
     SSLCertificateKeyFile /etc/ssl/{{ vhost }}.{{ host }}.key
     ErrorLog "/var/log/httpd/error_{{ vhost }}.log"
     CustomLog "/var/log/httpd/access_{{ vhost }}.log" common
 
-    {{ additional_settings }}
+{% for alias in aliases %}
+    ServerAlias {{ alias }}
+{% endfor %}
+{% for setting in additional_settings %}
+    {{ setting }}
+{% endfor %}
 
     Alias /.well-known/acme-challenge /srv/http/challenges
 
-    <Directory /srv/http/{{ root_dir }}>
+    <Directory {% if root_path is defined %}{{ root_path }}{% else %}/srv/http/{{ root_dir }}{% endif %}>
         Options {{ options }}
-        AllowOverride None
+        AllowOverride {{ allow_override }}
         Require all granted
+{% for setting in docroot_additional_settings %}
+        {{ setting }}
+{% endfor %}
     </Directory>
 
     <Directory /srv/http/challenges>
