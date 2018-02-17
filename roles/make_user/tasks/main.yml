@@ -26,5 +26,5 @@
   authorized_key:
     user: "{{ user }}"
     key: "{{ item }}"
-  with_file: files/authorized_keys
+  with_file: "{{ ssh_key_source }}"
 

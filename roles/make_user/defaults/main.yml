@@ -1,2 +1,3 @@
 ---
 ugroups: []
+ssh_key_source: files/authorized_keys
