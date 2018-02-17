@@ -1,0 +1,13 @@
+---
+- name: create user account
+  include_role:
+    name: make_user
+  vars:
+    user: elazar
+    password: "{{ elazar_user_pass }}"
+    mail: p_schon11@cs.uni-kl.de
+    ssh_key_source: authorized_keys
+- name: install urxvt support
+  pacman:
+    pkg: rxvt-unicode-terminfo
+    state: installed
