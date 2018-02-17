@@ -1,0 +1,37 @@
+---
+- name: install packages
+  pacman:
+    pkg: "{{ item }}"
+    state: installed
+  with_items:
+    - postgresql
+    - python-psycopg2
+
+- name: configure postgres user
+  user:
+    name: postgres
+    comment: "PostgreSQL user"
+    shell: /bin/nologin
+    home: /var/lib/postgres
+    system: yes
+    state: present
+
+- name: create cluster
+  become: yes
+  become_user: postgres
+  command: initdb --locale en_US.UTF-8 -E UTF8 -D '/var/lib/postgres/data'
+  args:
+    creates: /var/lib/postgres/data
+
+- name: do not upgrade postgresql automatically
+  lineinfile:
+    line: IgnorePkg = postgresql postgresql-libs
+    path: /etc/pacman.conf
+    insertafter: "IgnorePkg"
+    state: present
+
+- name: start postgresql
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
