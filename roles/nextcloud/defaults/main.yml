@@ -1,0 +1,3 @@
+---
+nextcloud_purge_install_yes_really: false
+nc_additional_users: []

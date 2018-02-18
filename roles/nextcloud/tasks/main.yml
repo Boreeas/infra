@@ -1,0 +1,188 @@
+---
+- import_tasks: purge.yml
+  when: nextcloud_purge_install_yes_really
+
+
+
+- name: install dependencies
+  pacman:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - php71
+    - php71-gd
+    - php71-intl
+    - php71-pgsql
+    - php71-apcu
+    - php71-fpm
+
+- name: enable php modules
+  copy:
+    src: php-nextcloud-mods.ini
+    dest: /etc/php/conf.d
+
+- name: configure php
+  copy:
+    src: php-nextcloud-conf.ini
+    dest: /etc/php/conf.d
+
+- name: install nextcloud
+  pacman:
+    pkg: nextcloud
+    state: installed
+
+- name: install nextcloud upgrade script
+  copy:
+    src: nextcloud-post-update.sh
+    dest: /usr/share/webapps/nextcloud/nextcloud-post-update.sh
+
+- name: install nextcloud upgrade trigger
+  copy:
+    src: nextcloud.hook
+    dest: /etc/pacman.d/hooks/nextcloud.hook
+
+- name: configure postgres user for nextcloud
+  postgresql_user:
+    name: nextcloud
+    password: "{{ nextcloud_db_password }}"
+    encrypted: yes
+
+- name: create db for nextcloud
+  postgresql_db:
+    name: nextcloud
+    owner: nextcloud
+
+- name: enable php-fpm
+  command: a2enmod {{ item }}
+  args:
+    creates: /etc/httpd/conf/mods-enabled/{{ item }}.load
+  with_items:
+    - proxy
+    - proxy_fcgi
+  notify:
+    - reload apache
+
+- name: configure php-fpm
+  copy:
+    src: php-fpm.conf
+    dest: /etc/httpd/conf/extra
+
+- name: link php-fpm.conf
+  lineinfile:
+    line: Include conf/extra/php-fpm.conf
+    path: /etc/httpd/conf/httpd.conf
+    insertafter: MARKER=extra-conf
+
+- name: start and enable the php-fpm service
+  service:
+    name: php-fpm
+    state: started
+    enabled: yes
+
+- import_role:
+    name: apache2
+  vars:
+    vhost: philae
+    host: boreeas.net
+    aliases:
+      - cloud.boreeas.net
+    options: FollowSymlinks
+    allow_override: All
+    root_path: /usr/share/webapps/nextcloud
+
+- name: fix nextcloud directory permissions
+  file:
+    path: /usr/share/webapps/nextcloud/{{ item }}
+    owner: http
+    group: http
+    mode: u=rwx,g-rwx,o-rwx
+    state: directory
+  with_items:
+    - apps2
+    - data
+
+- name: fix nextcloud config directory permissions
+  file:
+    path: /etc/webapps/nextcloud
+    owner: http
+    group: http
+    mode: u=rwx,g-rwx,o-rwx
+    recurse: yes
+
+- name: fix .htacces permissions
+  file:
+    path: /usr/share/webapps/nextcloud/.htaccess
+    owner: http
+
+- name: test setup status
+  lineinfile:
+    path: /etc/webapps/nextcloud/config/config.php
+    line: "  'installed' => true,"
+  register: result
+  ignore_errors: yes
+
+- name: render initial config
+  copy:
+    src: nextcloud-config-base.php
+    dest: /etc/webapps/nextcloud/config/config.php
+  when: result|changed or result|failed
+
+- name: finalize installation
+  command: /usr/bin/runuser -u http -- /usr/bin/php /usr/share/webapps/nextcloud/occ maintenance:install --database pgsql --database-name nextcloud --database-host localhost --database-user nextcloud --database-pass "{{ nc_conf_db_pass }}" --admin-user {{ nc_admin_user }} --admin-pass "{{ nc_admin_pass }}"
+  when: result|changed or result|failed
+
+- name: configure nextcloud
+  template:
+    src: nextcloud-config-customization.json
+    dest: /etc/webapps/nextcloud/config/extra.json
+  vars:
+    nc_conf_host: philae.boreeas.net
+    nc_conf_aliases:
+      - cloud.boreeas.net
+
+- name: disable theming
+  command: /usr/bin/runuser -u http -- /usr/bin/php /usr/share/webapps/nextcloud/occ app:disable theming
+
+- name: install dark theme
+  git:
+    repo: https://github.com/boreeas/nextcloud-breeze-dark.git
+    dest: /usr/share/webapps/nextcloud/themes/nextcloud-breeze-dark
+
+- name: configure nextcloud
+  command: /usr/bin/runuser -u http -- /usr/bin/php /usr/share/webapps/nextcloud/occ config:import /etc/webapps/nextcloud/config/extra.json
+
+- name: update .htaccess
+  command: /usr/bin/runuser -u http -- /usr/bin/php /usr/share/webapps/nextcloud/occ maintenance:update:htaccess
+
+- name: enable cron background tasks
+  cron:
+    user: http
+    name: nextcloud background tasks
+    minute: '*/15'
+    job: "php -f /usr/share/webapps/nextcloud/cron.php"
+
+- name: configure nextcloud to use cron
+  command: /usr/bin/runuser -u http -- /usr/bin/php /usr/share/webapps/nextcloud/occ background:cron
+
+- name: install additional apps
+  command: /usr/bin/runuser -u http -- /usr/bin/php /usr/share/webapps/nextcloud/occ app:install -n {{ item }}
+  with_items:
+    - calendar
+    - contacts
+  ignore_errors: yes
+
+- name: enable additonal apps
+  command: /usr/bin/runuser -u http -- /usr/bin/php /usr/share/webapps/nextcloud/occ app:enable -n {{ item }}
+  with_items:
+    - calendar
+    - contacts
+
+- name: create users
+  shell: OC_PASS="{{ item["pass"] }}" /usr/bin/runuser -u http -- /usr/bin/php /usr/share/webapps/nextcloud/occ user:add --password-from-env {{ item["name"] }}
+  with_items: "{{ nc_additional_users }}"
+
+
+- name: reload apache
+  service:
+    name: httpd
+    state: reloaded

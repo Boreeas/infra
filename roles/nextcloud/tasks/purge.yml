@@ -1,0 +1,23 @@
+---
+- name: deinstall nextcloud
+  pacman:
+    pkg: nextcloud
+    state: absent
+
+- name: remove directories and files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /usr/share/webapps/nextcloud
+    - /etc/webapps/nextcloud
+    - /etc/pacman.d/hooks/nextcloud.hook
+
+- name: remove databaase
+  postgresql_db:
+    name: nextcloud
+    state: absent
+
+- name: disable vhost
+  command: a2dissite philae
+

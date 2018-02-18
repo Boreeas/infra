@@ -14,9 +14,19 @@
     - role: apache2
       host: "{{ dns }}"
       mail: "{{ admin_mail }}"
+      a2_mode: "setup"
       tags:
         - apache2
     - role: znc
       znc_host: "irc.{{ dns }}"
       tags:
         - znc
+    - role: postgres
+      tags:
+        - postgres
+    - role: nextcloud
+      tags:
+        - nextcloud
+    - role: elazar-discord-bot
+      tags:
+        - elazar
