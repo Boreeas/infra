@@ -11,3 +11,12 @@
   pacman:
     pkg: rxvt-unicode-terminfo
     state: installed
+- name: install libraries
+  pacman:
+    pkg: "{{ item }}"
+    state: installed
+  with_items:
+    - libffi
+    - opus
+    - youtube-dl
+    - ffmpeg
