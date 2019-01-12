@@ -7,14 +7,13 @@
       raw: "pacman -Syy --noconfirm python"
       changed_when: false
 
-
 - hosts: servers
   remote_user: root
 
   vars:
     cron_pacman_log: /var/log/cron-pacman.log
     normal_user_name: mu
-    dotfiles_url: https://github.com/Boreeas/.dotfiles.git
+    dotfiles_url: https://github.com/strangeglyph/.dotfiles.git
 
   tasks:
     - name: set hostname
@@ -130,7 +129,7 @@
       become_user: "{{ normal_user_name }}"
       shell: ./script/bootstrap
       args:
-        chdir: .dotfiles
+        chdir: ~/.dotfiles
         executable: /bin/bash
         creates: ~/.zshrc
         stdin: |
