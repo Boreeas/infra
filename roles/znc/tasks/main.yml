@@ -20,20 +20,6 @@
     - cyrus-sasl
     - yajl
 
-- name: New user for AUR management
-  user:
-    name: aurman
-    comment: "AUR manager"
-    shell: /bin/nologin
-    home: /var/lib/aurman
-    system: yes
-    state: present
-
-- name: enable passwordless pacman for aurman
-  copy:
-    src: sudo_aurman
-    dest: /etc/sudoers.d/999-aurman
-
 - name: install gpg keys for aur packages
   become: yes
   become_user: aurman
@@ -41,12 +27,11 @@
   with_items:
     - 487EACC08557AD082088DABA1EB2638FF56C0C53
 
-- name: install cower
-  environment:
-    PATH: "{{ ansible_env.PATH }}:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl"
-  aur:
-    name: cower
-    user: aurman
+- name: remove znc
+  pacman:
+    name: znc-git
+    state: absent
+  when: znc_force_rebuild
 
 - name: install znc
   environment:

@@ -61,6 +61,13 @@ LoadModule = {{ mod }}
         {% for setting in (network["settings"] if "settings" in network else []) %}
         {{ setting }}
         {% endfor %}
+        {% for chan in (network["chans"] if "chans" in network else []) %}
+        <Chan #{{chan["name"]}}>
+            {% for setting in (chan["settings"] if "settings" in chan else []) %}
+            {{ setting }}
+            {% endfor %}
+        </Chan>
+        {% endfor %}
     </Network>
     {% endfor %}
 </User>
