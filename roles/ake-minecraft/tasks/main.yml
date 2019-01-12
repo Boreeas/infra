@@ -1,0 +1,14 @@
+---
+- name: create user account
+  include_role:
+    name: make_user
+  vars:
+    user: droktavius
+    password: "{{ ake_user_pass }}"
+    mail: jab98@gmx.de
+- name: install dependencies
+  pacman:
+    pkg: "{{ item }}"
+    state: installed
+  with_items:
+    - jre8-openjdk-headless
