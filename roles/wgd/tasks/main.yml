@@ -1,0 +1,87 @@
+---
+- name: create wgd user
+  include_role:
+    name: make_user
+  vars:
+    user: wgd
+    password: "{{ wgd_user_pass }}"
+    mail: "{{ admin_mail }}"
+
+- name: download binary
+  become: wgd
+  get_url:
+    url: https://github.com/strangeglyph/wgd/releases/download/v1.0.3/wgd.jar
+    dest: /home/wgd/wgd.jar
+    force: yes
+
+- name: download dates
+  become: wgd
+  get_url:
+    url: https://philae.boreeas.net/s/dTwkmW5EJ7CX4RP/download
+    dest: /home/wgd/trash.ics
+
+- name: render config
+  become: wgd
+  template:
+    src: config.properties.j2
+    dest: /home/wgd/config.properties
+
+- name: drop database
+  become: wgd
+  file:
+    name: /home/wgd/wgd.sqlite
+    state: absent
+  when: wgd_clean_install
+
+- name: create users
+  become: wgd
+  shell: java -jar wgd.jar -c config.properties --adduser {{ item }}
+  args:
+    chdir: /home/wgd
+  with_items:
+    - Malte
+    - Andreas
+    - Julian
+  when: wgd_clean_install
+
+- name: import dates
+  become: wgd
+  shell: java -jar wgd.jar -c config.properties -i trash.ics
+  args:
+    chdir: /home/wgd
+  when: wgd_clean_install
+
+- name: create tasks - kitchen
+  become: wgd
+  shell: java -jar wgd.jar -c config.properties --addtask "Küche putzen" -p malte -p andreas -p julian --duedate 2018-10-06
+  args:
+    chdir: /home/wgd
+  when: wgd_clean_install
+
+- name: create tasks - small bathroom
+  become: wgd
+  shell: java -jar wgd.jar -c config.properties --addtask "Kleines Bad putzen" -p malte -p andreas --duedate 2018-10-06
+  args:
+    chdir: /home/wgd
+  when: wgd_clean_install
+
+- name: change file ownership
+  file:
+    path: "/home/wgd/{{ item }}"
+    owner: wgd
+    group: wgd
+  with_items:
+    - config.properties
+    - wgd.jar
+    - wgd.sqlite
+
+- name: install service file
+  copy:
+    src: wgd.service
+    dest: /etc/systemd/system
+
+- name: start & enable service
+  service:
+    name: wgd.service
+    enabled: yes
+    state: restarted

@@ -1,0 +1,14 @@
+[Unit]
+Description=WG Management Daemon
+After=network.target
+Requires=network.target
+
+[Service]
+Type=simple
+User=wgd
+WorkingDirectory=/home/wgd
+ExecStart=java -jar wgd.jar --start
+Restart=never
+
+[Install]
+WantedBy=multi-user.target
