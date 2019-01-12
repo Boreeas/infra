@@ -17,20 +17,22 @@ znc_modules:
 znc_settings:
   - MaxBufferSize = 500
 znc_users:
-  - name: mu
+  - name: strangeglyph
     admin: true
-    altname: nu
+    altname: weirdglyph
     realname: hell if i know
     modules:
       - chansaver
       - controlpanel
-      - flooddetach
+      - flooddetach 10 2
       - log
       - send_raw
     settings:
       - Buffer = 500
       - CTCPReply = VERSION telnet v1.9.4
       - QuitMsg = User terminated
+      - StatusPrefix = *
+      - TimestampFormat = [%H:%M:%S]
     networks:
       - name: rizon
         address: irc.rizon.net
@@ -40,6 +42,12 @@ znc_users:
           - autocycle
           - nickserv
           - route_replies
+        settings:
+          - FloodBurst = 9
+          - FloodRate = 2.00
+          - JoinDelay = 5
+        chans:
+          - name: tmdevs
       - name: veekun
         address: irc.veekun.com
         port: 6697
@@ -48,6 +56,15 @@ znc_users:
           - autocycle
           - nickserv
           - route_replies
+          - keepnick
+        settings:
+          - "TrustedServerFingerprint = 5d:35:12:45:ec:02:85:87:f9:0f:c4:1c:d9:8b:b6:52:37:81:c9:e4:65:b5:3b:55:02:84:9d:0c:bb:57:21:66"
+          - FloodBurst = 9
+          - FloodRate = 2.00
+          - JoinDelay = 5
+        chans:
+          - name: ":)"
+          - name: veekun
       - name: freenode
         address: chat.freenode.net
         port: 6697
@@ -57,8 +74,23 @@ znc_users:
           - nickserv
           - route_replies
         settings:
-          - Nick = Boreeas
-          - AltNick = Boreeas_
+          - Nick = strangeglyph
+          - AltNick = weirdglyph
+          - FloodBurst = 9
+          - FloodRate = 2.00
+          - JoinDelay = 5
+        chans:
+          - name: "#re"
+          - name: D&D
+          - name: ansible
+          - name: haskell
+          - name: netzob
+          - name: nextcloud
+          - name: osdev
+          - name: unity3d
+          - name: wireshark
+          - name: "#whitequark"
+          - name: x64dbg
       - name: moznet
         address: irc.mozilla.org
         port: 6697
@@ -67,14 +99,31 @@ znc_users:
           - autocycle
           - nickserv
           - route_replies
+        settings:
+          - FloodBurst = 9
+          - FloodRate = 2.00
+          - JoinDelay = 5
+        chans:
+          - name: chatzilla
+          - name: config
+          - name: firefox
+          - name: redox
+          - name: rust
+          - name: rust-internals
       - name: quakenet
         address: irc.quakenet.org
-        port: 6697
-        ssl: yes
+        port: 6667
+        ssl: no
         modules:
           - autocycle
           - q
           - route_replies
+        settings:
+          - FloodBurst = 9
+          - FloodRate = 2.00
+          - JoinDelay = 5
+        chans:
+          - name: r/leagueoflegends
       - name: hackint
         address: irc.hackint.org
         port: 6697
@@ -83,6 +132,28 @@ znc_users:
           - autocycle
           - nickserv
           - route_replies
+        settings:
+          - "TrustedServerFingerprint = 31:d0:a7:54:07:bb:ab:ae:04:0a:d0:51:dc:2d:12:cf:03:48:c8:58:37:07:cc:9c:ad:fc:2b:15:f2:c1:24:32"
+          - "TrustedServerFingerprint = a2:9f:7c:e6:f0:06:bb:1f:5b:58:5a:4a:14:9b:bd:82:1a:a2:24:1e:a7:0b:37:98:6c:fc:e5:e8:00:03:8c:91"
+          - "TrustedServerFingerprint = d0:32:ca:22:4e:0e:13:3a:e1:95:f8:03:ce:d0:ed:f2:57:c2:3c:09:7b:71:de:26:f8:e1:e2:56:5f:2a:aa:a0"
+          - "TrustedServerFingerprint = e7:1b:c0:54:60:c2:83:17:34:23:fd:0b:e3:f9:d9:9d:07:38:f9:b0:a5:4e:74:c3:d9:24:05:7b:ed:13:db:79"
+          - "TrustedServerFingerprint = fe:c3:56:08:cf:ae:6c:c9:b8:d7:5d:40:94:27:90:8d:df:c7:31:76:ad:9f:e1:8e:32:90:73:b3:a2:57:b7:f2"
+          - FloodBurst = 9
+          - FloodRate = 2.00
+          - JoinDelay = 5
+        chans:
+          - name: 35c3
+          - name: 37c3
+          - name: c3kl
+          - name: casualtabletop
+          - name: chaos-angel
+          - name: djgnulpf
+          - name: fsinfo
+          - name: fsit
+          - name: minecraft
+          - name: translate
+          - name: trashabend
+          - name: z0ttelcraft
       - name: parahumans
         address: irc.parahumans.net
         port: 6697
@@ -91,3 +162,13 @@ znc_users:
           - autocycle
           - nickserv
           - route_replies
+        settings:
+          - FloodBurst = 9
+          - FloodRate = 2.00
+          - JoinDelay = 5
+          - "TrustedServerFingerprint = c8:af:fb:57:64:95:35:7c:72:0d:0d:74:a7:21:50:47:2a:f2:00:5d:b2:98:29:28:c1:65:9d:a9:e6:e5:2e:02"
+        chans:
+          - name: Treefort_Lookout
+          - name: Ward
+          - name: parahumans
+          - name: programming
