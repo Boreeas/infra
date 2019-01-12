@@ -20,6 +20,7 @@
             "{{ nc_conf_host}}"
         ],
         "mail_domain": "{{ nc_conf_host }}",
+        "overwrite.cli.url": "https://{{ nc_conf_host }}/",
         "htaccess.RewriteBase": "/",
         "htaccess.IgnoreFrontController": true,
         "logfile": "/var/log/nextcloud/nextcloud.log",

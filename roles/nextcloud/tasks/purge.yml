@@ -12,6 +12,7 @@
     - /usr/share/webapps/nextcloud
     - /etc/webapps/nextcloud
     - /etc/pacman.d/hooks/nextcloud.hook
+    - /var/log/nextcloud
 
 - name: remove databaase
   postgresql_db:

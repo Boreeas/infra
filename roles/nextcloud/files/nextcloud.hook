@@ -10,4 +10,4 @@ Target=nextcloud-app-*
 [Action]
 Description=Updating nextcloud installation
 When=PostTransaction
-Exec=/bin/bash /usr/share/webapps/nextcloud/nextcloud-post-update.sh
+Exec=/bin/bash /etc/webapps/nextcloud/nextcloud-post-update.sh

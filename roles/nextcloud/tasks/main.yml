@@ -31,10 +31,21 @@
     pkg: nextcloud
     state: installed
 
-- name: install nextcloud upgrade script
+- name: install nextcloud scripts
   copy:
-    src: nextcloud-post-update.sh
-    dest: /usr/share/webapps/nextcloud/nextcloud-post-update.sh
+    src: "{{ item }}"
+    dest: /etc/webapps/nextcloud/
+  with_items:
+    - nextcloud-post-update.sh
+    - backup.sh
+    - restore.sh
+
+- name: enable daily backup
+  cron:
+    name: nextcloud backup
+    hour: 3
+    minute: 42
+    job: /etc/webapps/nextcloud/backup.sh 2>/var/log/nextcloud/backup-err.txt
 
 - name: install nextcloud upgrade trigger
   copy:
@@ -89,6 +100,9 @@
     options: FollowSymlinks
     allow_override: All
     root_path: /usr/share/webapps/nextcloud
+    additional_settings:
+      - Redirect /.well-known/carddav https://philae.boreeas.net/remote.php/dav
+      - Redirect /.well-known/caldav https://philae.boreeas.net/remote.php/dav
 
 - name: fix nextcloud directory permissions
   file:
@@ -109,7 +123,12 @@
     mode: u=rwx,g-rwx,o-rwx
     recurse: yes
 
-- name: fix .htacces permissions
+- name: create log directory
+  file:
+    path: /var/log/nextcloud
+    state: directory
+
+- name: fix .htaccess permissions
   file:
     path: /usr/share/webapps/nextcloud/.htaccess
     owner: http
@@ -125,16 +144,20 @@
   copy:
     src: nextcloud-config-base.php
     dest: /etc/webapps/nextcloud/config/config.php
-  when: result|changed or result|failed
+    owner: http
+    group: http
+  when: result is changed or result is failed
 
 - name: finalize installation
   command: /usr/bin/runuser -u http -- /usr/bin/php /usr/share/webapps/nextcloud/occ maintenance:install --database pgsql --database-name nextcloud --database-host localhost --database-user nextcloud --database-pass "{{ nc_conf_db_pass }}" --admin-user {{ nc_admin_user }} --admin-pass "{{ nc_admin_pass }}"
-  when: result|changed or result|failed
+  when: result is changed or result is failed
 
 - name: configure nextcloud
   template:
     src: nextcloud-config-customization.json
     dest: /etc/webapps/nextcloud/config/extra.json
+    owner: http
+    group: http
   vars:
     nc_conf_host: philae.boreeas.net
     nc_conf_aliases:
@@ -145,7 +168,7 @@
 
 - name: install dark theme
   git:
-    repo: https://github.com/boreeas/nextcloud-breeze-dark.git
+    repo: https://github.com/strangeglyph/nextcloud-breeze-dark.git
     dest: /usr/share/webapps/nextcloud/themes/nextcloud-breeze-dark
 
 - name: configure nextcloud
