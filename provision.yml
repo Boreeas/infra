@@ -51,7 +51,7 @@
 
     - name: install necessary packages
       pacman:
-        pkg: "{{ item }}"
+        name: "{{ item }}"
         state: latest
       with_items:
         - zsh
@@ -66,6 +66,8 @@
         - vim
         - screen
         - python-pip
+        - unzip
+        - pv
 
     - name: "sudo: enable wheel group"
       template:
@@ -155,6 +157,33 @@
         dest: /etc/ssh/sshd_config
       notify:
         - restart sshd
+
+    - name: New user for AUR management
+      user:
+        name: aurman
+        comment: "AUR manager"
+        shell: /bin/nologin
+        home: /var/lib/aurman
+        system: yes
+        state: present
+
+    - name: enable passwordless pacman for aurman
+      copy:
+        src: sudo_aurman
+        dest: /etc/sudoers.d/999-aurman
+
+    - name: clean install of cower (remove old)
+      pacman:
+        name: cower
+        state: absent
+
+    - name: clean install of cower
+      environment:
+        PATH: "{{ ansible_env.PATH }}:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl"
+      aur:
+        name: cower
+        user: aurman
+
 
   handlers:
     - name: restart sshd
