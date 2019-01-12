@@ -30,3 +30,9 @@
     - role: elazar-discord-bot
       tags:
         - elazar
+    - role: ake-minecraft
+      tags:
+        - ake
+    - role: wgd
+      tags:
+        - wgd
