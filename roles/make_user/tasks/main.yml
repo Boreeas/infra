@@ -13,7 +13,7 @@
   become_user: "{{ user }}"
   shell: ./script/bootstrap
   args:
-    chdir: .dotfiles
+    chdir: ~/.dotfiles
     executable: /bin/bash
     creates: ~/.zshrc
     stdin: |
