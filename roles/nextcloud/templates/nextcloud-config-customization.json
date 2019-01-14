@@ -28,6 +28,12 @@
         "log_rotate_size": 104857600,
         "filesystem_check_changes": 1,
         "theme": "nextcloud-breeze-dark",
-        "memcache.local": "\\OC\\Memcache\\APCu"
+        "memcache.local": "\\OC\\Memcache\\APCu",
+        "memcache.distributed": "\\OC\\Memcache\\Redis",
+        "memcache.locking": "\\OC\\Memcache\\Redis",
+        "redis": {
+            "host": "/run/redis/redis.sock",
+            "port": 0
+        }
     }
 }

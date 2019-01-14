@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/usr/sbin/pkg-config freetype2 $@

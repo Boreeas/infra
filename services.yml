@@ -24,6 +24,10 @@
     - role: postgres
       tags:
         - postgres
+    - role: redis
+      tags:
+        - redis
+        - nextcloud
     - role: nextcloud
       tags:
         - nextcloud

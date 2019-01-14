@@ -2,19 +2,30 @@
 - import_tasks: purge.yml
   when: nextcloud_purge_install_yes_really
 
-
-
-- name: install dependencies
+- name: install php deps
   pacman:
-    pkg: "{{ item }}"
-    state: present
-  with_items:
-    - php71
-    - php71-gd
-    - php71-intl
-    - php71-pgsql
-    - php71-apcu
-    - php71-fpm
+    name:
+      - php
+      - php-gd
+      - php-intl
+      - php-pgsql
+      - php-apcu
+      - php-fpm
+    state: latest
+
+- name: hack a replacement for freetype-config
+  copy:
+    src: freetype-config
+    dest: /usr/sbin/freetype-config
+    mode: u=rwx,g=rx,o=rx
+
+- name: install php and modules
+  become: yes
+  become_user: aur_builder
+  aur:
+    name:
+      - php-igbinary
+      - php-redis
 
 - name: enable php modules
   copy:
@@ -127,6 +138,8 @@
   file:
     path: /var/log/nextcloud
     state: directory
+    owner: http
+    group: http
 
 - name: fix .htaccess permissions
   file:
@@ -203,6 +216,7 @@
 - name: create users
   shell: OC_PASS="{{ item["pass"] }}" /usr/bin/runuser -u http -- /usr/bin/php /usr/share/webapps/nextcloud/occ user:add --password-from-env {{ item["name"] }}
   with_items: "{{ nc_additional_users }}"
+  ignore_errors: yes
 
 
 - name: reload apache

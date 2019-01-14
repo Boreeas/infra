@@ -1,0 +1,44 @@
+- name: install redis
+  pacman:
+    name: redis
+    state: installed
+
+- name: disable transparent huge pages
+  copy:
+    src: redis-thp.conf
+    dest: /etc/tmpfiles.d/redis.conf
+
+- name: increase tcp backlog and enable overcommit
+  copy:
+    src: sysctl.conf
+    dest: /etc/sysctl.d/99-sysctl.conf
+
+- name: configure redis
+  lineinfile:
+    path: /etc/redis.conf
+    line: port 6379
+    state: absent
+
+- name: configure redis
+  lineinfile:
+    path: /etc/redis.conf
+    line: "{{ item }}"
+  with_items:
+    - bind 127.0.0.1
+    - port 0
+    - unixsocket /run/redis/redis.sock
+    - unixsocketperm 770
+
+- name: add users to redis groups
+  user:
+    name: "{{ item }}"
+    groups: redis
+    append: yes
+  with_items:
+    - http
+
+- name: start redis
+  service:
+    name: redis
+    state: started
+    enabled: yes
