@@ -1,1 +1,1 @@
-aurman      ALL = NOPASSWD: /usr/bin/pacman
+aur_builder      ALL = NOPASSWD: /usr/bin/pacman

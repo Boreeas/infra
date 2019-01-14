@@ -22,7 +22,7 @@
 
 - name: install gpg keys for aur packages
   become: yes
-  become_user: aurman
+  become_user: aur_builder
   command: gpg --recv-keys {{ item }}
   with_items:
     - 487EACC08557AD082088DABA1EB2638FF56C0C53
@@ -34,11 +34,10 @@
   when: znc_force_rebuild
 
 - name: install znc
-  environment:
-    PATH: "{{ ansible_env.PATH }}:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl"
+  become: yes
+  become_user: aur_builder
   aur:
     name: znc-git
-    user: aurman
 
 - name: make sure znc is stopped
   service:

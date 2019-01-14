@@ -1,3 +1,3 @@
 [submodule "deps/ansible-aur"]
 	path = deps/ansible-aur
-	url = git@github.com:pigmonkey/ansible-aur.git
+	url = https://github.com/kewlfft/ansible-aur.git

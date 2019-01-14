@@ -12,7 +12,7 @@
 
   vars:
     cron_pacman_log: /var/log/cron-pacman.log
-    normal_user_name: mu
+    normal_user_name: strangeglyph
     dotfiles_url: https://github.com/strangeglyph/.dotfiles.git
 
   tasks:
@@ -50,23 +50,24 @@
 
     - name: install necessary packages
       pacman:
-        name: "{{ item }}"
         state: latest
-      with_items:
-        - zsh
-        - termite-terminfo
-        - cronie
-        - git
-        - sudo
-        - rsync
-        - strace
-        - htop
-        - lsof
-        - vim
-        - screen
-        - python-pip
-        - unzip
-        - pv
+        name:
+          - zsh
+          - termite-terminfo
+          - cronie
+          - git
+          - sudo
+          - rsync
+          - strace
+          - htop
+          - lsof
+          - vim
+          - screen
+          - python-pip
+          - unzip
+          - pv
+          - go
+          - base-devel
 
     - name: "sudo: enable wheel group"
       template:
@@ -159,29 +160,26 @@
 
     - name: New user for AUR management
       user:
-        name: aurman
+        name: aur_builder
         comment: "AUR manager"
         shell: /bin/nologin
-        home: /var/lib/aurman
         system: yes
-        state: present
 
     - name: enable passwordless pacman for aurman
       copy:
         src: sudo_aurman
         dest: /etc/sudoers.d/999-aurman
 
-    - name: clean install of cower (remove old)
+    - name: remove cower
       pacman:
         name: cower
         state: absent
 
-    - name: clean install of cower
-      environment:
-        PATH: "{{ ansible_env.PATH }}:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl"
+    - name: setup aur pkg tool
+      become: yes
+      become_user: aur_builder
       aur:
-        name: cower
-        user: aurman
+        name: yay
 
 
   handlers:
