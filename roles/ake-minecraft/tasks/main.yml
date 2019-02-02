@@ -8,7 +8,6 @@
     mail: jab98@gmx.de
 - name: install dependencies
   pacman:
-    pkg: "{{ item }}"
+    pkg:
+      - jre8-openjdk-headless
     state: installed
-  with_items:
-    - jre8-openjdk-headless
