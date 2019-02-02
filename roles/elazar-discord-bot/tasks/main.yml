@@ -13,10 +13,10 @@
     state: installed
 - name: install libraries
   pacman:
-    pkg: "{{ item }}"
+    pkg:
+      - libffi
+      - opus
+      - youtube-dl
+      - ffmpeg
     state: installed
-  with_items:
-    - libffi
-    - opus
-    - youtube-dl
-    - ffmpeg
+
