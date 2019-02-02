@@ -11,14 +11,13 @@
 
 - name: install znc dependencies
   pacman:
-    pkg: "{{ item }}"
+    pkg:
+      - tcl
+      - python
+      - perl
+      - cyrus-sasl
+      - yajl
     state: present
-  with_items:
-    - tcl
-    - python
-    - perl
-    - cyrus-sasl
-    - yajl
 
 - name: install gpg keys for aur packages
   become: yes
