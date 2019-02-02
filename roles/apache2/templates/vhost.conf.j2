@@ -11,8 +11,8 @@
     SSLEngine on
     SSLCertificateFile /etc/ssl/{{ vhost }}.{{ host }}.crt
     SSLCertificateKeyFile /etc/ssl/{{ vhost }}.{{ host }}.key
-    ErrorLog "/var/log/httpd/error_{{ vhost }}.log"
-    CustomLog "/var/log/httpd/access_{{ vhost }}.log" common
+    ErrorLog "/var/log/httpd/error_{{ vhost }}.{{ host }}.log"
+    CustomLog "/var/log/httpd/access_{{ vhost }}.{{ host }}.log" common
 
 {% for alias in aliases %}
     ServerAlias {{ alias }}

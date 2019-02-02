@@ -5,3 +5,4 @@ options: None
 allow_override: None
 additional_settings: []
 docroot_additional_settings: []
+dir_group: http

@@ -2,7 +2,7 @@
 - name: "create vhost config: {{ vhost }}"
   template:
     src: vhost.conf.j2
-    dest: /etc/httpd/conf/sites-available/{{ vhost }}
+    dest: /etc/httpd/conf/sites-available/{{ vhost }}.{{ host }}
   notify:
     - reload apache
 
@@ -11,7 +11,8 @@
     path: "{{ root_path }}"
     state: directory
     owner: http
-    group: http
+    group: "{{ dir_group }}"
+    mode: u=rwx,g=rwxs,o=rx
   when: root_path is defined
 
 - name: create webroot
@@ -19,7 +20,8 @@
     path: /srv/http/{{ root_dir }}
     state: directory
     owner: http
-    group: http
+    group: "{{ dir_group }}"
+    mode: u=rwx,g=rwxs,o=rx
   when: root_path is not defined
 
 - name: request a certificate
@@ -29,8 +31,8 @@
     domain: "{{ vhost }}.{{ host }}"
 
 - name: "enable vhost: {{ vhost }}"
-  command: a2ensite {{ vhost }}
+  command: a2ensite {{ vhost }}.{{ host }}
   args:
-    creates: /etc/httpd/conf/sites-enabled/{{ vhost }}
+    creates: /etc/httpd/conf/sites-enabled/{{ vhost }}.{{ host }}
   notify:
     - reload apache
