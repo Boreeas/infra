@@ -1,11 +1,10 @@
 ---
 - name: install packages
   pacman:
-    pkg: "{{ item }}"
+    pkg:
+      - postgresql
+      - python-psycopg2
     state: installed
-  with_items:
-    - postgresql
-    - python-psycopg2
 
 - name: configure postgres user
   user:
