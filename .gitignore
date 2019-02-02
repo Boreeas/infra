@@ -2,8 +2,8 @@
 *.secret
 
 # Ignore host vars (sensitive information go here)
-host_vars/*
-!host_vars/template
+inventory/host_vars/*
+!inventory/host_vars/template
 
 vars/znc-pass.yml
 library/*
