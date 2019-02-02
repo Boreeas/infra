@@ -17,7 +17,7 @@
 - name: download dates
   become: wgd
   get_url:
-    url: https://philae.boreeas.net/s/dTwkmW5EJ7CX4RP/download
+    url: https://philae.boreeas.net/s/SCLrLgDwqr7Lfym/download
     dest: /home/wgd/trash.ics
 
 - name: render config
