@@ -105,7 +105,6 @@ znc_users:
           - JoinDelay = 5
         chans:
           - name: chatzilla
-          - name: config
           - name: firefox
           - name: redox
           - name: rust
