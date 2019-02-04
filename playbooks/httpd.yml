@@ -1,0 +1,10 @@
+---
+- hosts: philae
+  user: root
+  tasks:
+    - include_role:
+        name: apache2
+      vars:
+        a2_mode: setup
+        host: "{{ dns }}"
+        mail: "{{ admin_mail }}"

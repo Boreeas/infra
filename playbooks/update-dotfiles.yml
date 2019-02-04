@@ -8,7 +8,7 @@
         chdir: /etc/skel/.dotfiles
 
     - name: update root
-      shell: git pull && ./script/bootstrap
+      shell: git pull
       args:
         chdir: /root/.dotfiles
 
@@ -19,7 +19,7 @@
     - name: update users
       become: yes
       become_user: "{{ item }}"
-      shell: git pull && ./script/bootstrap
+      shell: git pull
       args:
         chdir: /home/{{ item }}/.dotfiles
       with_items: "{{ home_dirs.stdout_lines }}"

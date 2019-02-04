@@ -1,0 +1,14 @@
+---
+- hosts: philae
+  user: root
+  vars_files:
+    - "{{ playbook_dir }}/../vars/znc.yml"
+    - "{{ playbook_dir }}/../vars/znc-pass.yml"
+  tasks:
+    - include_role:
+        name: znc
+      vars:
+        znc_user: znc
+        znc_host: irc.{{ dns }}
+
+

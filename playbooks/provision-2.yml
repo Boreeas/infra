@@ -1,0 +1,7 @@
+- hosts: home
+  remote_user: root
+  gather_facts: false
+  tasks:
+    - name: install python for ansible
+      raw: "apt-get install --yes python3"
+      changed_when: false

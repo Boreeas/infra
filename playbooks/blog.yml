@@ -1,0 +1,6 @@
+---
+- hosts: philae
+  user: root
+  tasks:
+    - include_role:
+        name: blog
