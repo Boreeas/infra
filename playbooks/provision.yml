@@ -21,7 +21,7 @@
 
     - name: set hostname permanently
       template:
-        src: files/hostname.j2
+        src: "{{ playbook_dir }}/../files/hostname.j2"
         dest: /etc/hostname
 
     - name: set timezone
@@ -34,7 +34,7 @@
 
     - name: render locale config
       template:
-        src: files/locale.gen
+        src: "{{ playbook_dir }}/../files/locale.gen"
         dest: /etc/locale.gen
 
     - name: generate locales
@@ -71,12 +71,12 @@
 
     - name: "sudo: enable wheel group"
       template:
-        src: files/sudo_wheel
+        src: "{{ playbook_dir }}/../files/sudo_wheel"
         dest: /etc/sudoers.d/wheel
 
     - name: "sudo: configure sudo"
       copy:
-        src: files/sudo_conf
+        src: "{{ playbook_dir }}/../files/sudo_conf"
         dest: /etc/sudoers.d/config
 
     - name: "cron: set MAILTO"
@@ -141,7 +141,7 @@
       authorized_key:
         user: root
         key: "{{ item }}"
-      with_file: files/authorized_keys
+      with_file: "{{ playbook_dir }}/../files/authorized_keys"
 
     - name: set authorized_keys for {{ normal_user_name }}
       become: yes
@@ -149,11 +149,11 @@
       authorized_key:
         user: "{{ normal_user_name }}"
         key: "{{ item }}"
-      with_file: files/authorized_keys
+      with_file: "{{ playbook_dir }}/../files/authorized_keys"
 
     - name: configure ssh
       template:
-        src: files/sshd_config.j2
+        src: "{{ playbook_dir }}/../files/sshd_config.j2"
         dest: /etc/ssh/sshd_config
       notify:
         - restart sshd
@@ -167,7 +167,7 @@
 
     - name: enable passwordless pacman for aurman
       copy:
-        src: sudo_aurman
+        src: "{{ playbook_dir }}/../files/sudo_aurman"
         dest: /etc/sudoers.d/999-aurman
 
     - name: remove cower
