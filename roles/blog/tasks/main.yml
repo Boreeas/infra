@@ -1,0 +1,83 @@
+---
+- name: create blog user
+  include_role:
+    name: make_user
+  vars:
+    user: blog
+    password: "{{ blog_user_pass }}"
+    mail: "{{ admin_mail }}"
+    ugroups:
+      - ssl
+      - http
+
+- name: install dependencies (pacman)
+  pacman:
+    name: python
+    state: latest
+
+- name: configure apache (boreeas.net)
+  import_role:
+    name: apache2
+  vars:
+    vhost: blog
+    host: boreeas.net
+    options: FollowSymlinks
+    allow_override: All
+    root_dir: blog
+    dir_group: blog
+
+- name: configure apache (strangegly.ph)
+  import_role:
+    name: apache2
+  vars:
+    vhost: www
+    host: strangegly.ph
+    aliases:
+      - strangegly.ph
+      - blog.strangegly.ph
+    options: FollowSymlinks
+    allow_override: All
+    root_dir: blog
+    dir_group: blog
+
+
+- become: yes
+  become_user: blog
+  block:
+    - name: initialize bare git repository
+      command: git init --bare ~/blog.git
+      args:
+        creates: ~/blog.git/HEAD
+
+    - name: create post-receive hook
+      copy:
+        src: post-receive.sh
+        dest: ~/blog.git/hooks/post-receive
+        mode: u=rwx,g=r,o=r
+
+    - name: clone blog repository
+      command: git clone ~/blog.git ~/blog
+      args:
+        creates: ~/blog
+
+    - name: initialize site dir
+      file:
+        name: ~/blog/site
+        state: directory
+
+    - name: link output dir
+      file:
+        src: /srv/http/blog # link target
+        dest: ~/blog/site/output # link file
+        state: link
+
+    - name: Create a virtualenv
+      pip:
+        name: "Nikola[extras]"
+        virtualenv: ~/.virtenvs/blog
+
+    - name: Try to do an initial build
+      ignore_errors: yes
+      command: ~/.virtenvs/blog/bin/nikola build
+      args:
+        chdir: ~/blog/site
