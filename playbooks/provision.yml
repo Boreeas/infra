@@ -73,7 +73,7 @@
           - pv
           - go
           - base-devel
-          - gnu-netcat
+          - socat
 
     - name: "sudo: enable wheel group"
       template:
