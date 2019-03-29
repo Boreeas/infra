@@ -1,5 +1,8 @@
 <VirtualHost *:80>
     ServerName {{ vhost }}.{{ host }}
+{% for alias in aliases %}
+    ServerAlias {{ alias }}
+{% endfor %}
     RedirectMatch permanent "^/((?!\.well-known/acme-challenge/).*)" https://{{ vhost }}.{{ host }}/$1
     Alias /.well-known/acme-challenge /srv/http/challenges
 </VirtualHost>
