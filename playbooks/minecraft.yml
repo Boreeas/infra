@@ -1,0 +1,9 @@
+---
+- hosts: philae
+  user: root
+  tasks:
+    - include_role:
+        name: minecraft
+      vars:
+        forge_version: 1.12.2-14.23.5.2825
+        modpack_url: https://philae.boreeas.net/s/DxDFiQSJRr2J8Rk/download

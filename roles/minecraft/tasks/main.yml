@@ -1,0 +1,74 @@
+---
+- name: create user account
+  include_role:
+    name: make_user
+  vars:
+    user: minecraft
+    password: "{{ minecraft_user_pass }}"
+    mail: mail@example.com
+- name: install dependencies
+  pacman:
+    pkg:
+      - jre8-openjdk-headless
+    state: installed
+
+- become: yes
+  become_user: minecraft
+  block:
+    - name: create folder
+      file:
+        path: /home/minecraft/minecraft
+        state: directory
+
+    - name: download forge installer
+      get_url:
+        url: https://files.minecraftforge.net/maven/net/minecraftforge/forge/{{ forge_version }}/forge-{{ forge_version }}-installer.jar
+        dest: /home/minecraft/minecraft/forge-installer.jar
+
+    - name: install forge
+      shell: java -jar forge-installer.jar --installServer
+      args:
+        chdir: /home/minecraft/minecraft
+
+    - name: rename jar
+      shell: mv /home/minecraft/minecraft/forge-{{ forge_version }}-universal.jar /home/minecraft/minecraft/forge-server.jar
+
+    - name: get modpack
+      get_url:
+        url: "{{ modpack_url }}"
+        dest: /home/minecraft/modpack.zip
+
+    - name: setup tmp dir
+      file:
+        path: /home/minecraft/modpack
+        state: directory
+
+    - name: unzip modpack
+      unarchive:
+        src: /home/minecraft/modpack.zip
+        dest: /home/minecraft/modpack
+        remote_src: yes
+
+    - name: copy files
+      shell: cp -r /home/minecraft/modpack/*/.minecraft/config /home/minecraft/modpack/*/.minecraft/mods /home/minecraft/minecraft
+
+    - name: remove temporary files
+      file:
+        path: /home/minecraft/modpack
+        state: absent
+
+    - name: agree to eula
+      copy:
+        src: eula.txt
+        dest: /home/minecraft/minecraft/eula.txt
+
+- name: install service file
+  copy:
+    src: minecraft.service
+    dest: /etc/systemd/system
+
+- name: start & enable service
+  service:
+    name: minecraft.service
+    enabled: yes
+    state: restarted
