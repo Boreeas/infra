@@ -49,8 +49,16 @@
         dest: /home/minecraft/modpack
         remote_src: yes
 
-    - name: copy files
-      shell: cp -r /home/minecraft/modpack/*/.minecraft/config /home/minecraft/modpack/*/.minecraft/mods /home/minecraft/minecraft
+    - name: remove old files
+      file:
+        path: /home/minecraft/minecraft/{{ item }}
+        state: absent
+      with_items:
+        - config
+        - mods
+
+    - name: move files
+      shell: mv /home/minecraft/modpack/*/.minecraft/config /home/minecraft/modpack/*/.minecraft/mods /home/minecraft/minecraft
 
     - name: remove temporary files
       file:
