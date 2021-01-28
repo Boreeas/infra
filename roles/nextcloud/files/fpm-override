@@ -1,0 +1,5 @@
+[Service]
+ReadWritePaths = /usr/share/webapps/nextcloud/apps
+ReadWritePaths = /usr/share/webapps/nextcloud/apps2
+ReadWritePaths = /usr/share/webapps/nextcloud/data
+ReadWritePaths = /etc/webapps/nextcloud/config

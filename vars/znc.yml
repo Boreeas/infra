@@ -12,7 +12,6 @@ znc_listeners:
 znc_modules:
   - modpython
   - modperl
-  - partyline
   - adminlog
 znc_settings:
   - MaxBufferSize = 500
@@ -87,7 +86,6 @@ znc_users:
           - name: netzob
           - name: nextcloud
           - name: osdev
-          - name: unity3d
           - name: wireshark
           - name: "#whitequark"
           - name: x64dbg
@@ -115,7 +113,6 @@ znc_users:
         ssl: no
         modules:
           - autocycle
-          - q
           - route_replies
         settings:
           - FloodBurst = 9

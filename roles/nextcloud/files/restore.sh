@@ -4,7 +4,7 @@ set -e
 # Find and verify backup directory
 LOCATION="$1"
 if [ "$LOCATION" == "" ]; then
-    LOCATION="/root/ncbackup"
+    LOCATION="/var/backup/ncbackup"
 fi
 if ! [ -d "$LOCATION" ]; then
    echo "No backup at $LOCATION"

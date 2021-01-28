@@ -1,0 +1,58 @@
+---
+- name: create sunrise user
+  include_role:
+    name: make_user
+  vars:
+    user: sunrise
+    password: "{{ sunrise_user_pass }}"
+    mail: "{{ admin_mail }}"
+    ugroups:
+      - ssl
+      - http
+
+- name: install dependencies (pacman)
+  pacman:
+    name:
+      - jdk-openjdk
+      - gradle
+    state: latest
+
+- name: setup jdk version
+  command: archlinux-java set java-12-openjdk
+
+- name: configure apache
+  import_role:
+    name: apache2
+  vars:
+    vhost: dawn
+    host: strangegly.ph
+    allow_override: All
+    root_dir: sunrise
+    dir_group: sunrise
+
+- become: yes
+  become_user: sunrise
+  block:
+    - name: initialize bare git repository
+      command: git init --bare ~/sunrise.git
+      args:
+        creates: ~/sunrise.git/HEAD
+
+    - name: create post-receive hook
+      copy:
+        src: post-receive.sh
+        dest: ~/sunrise.git/hooks/post-receive
+        mode: u=rwx,g=r,o=r
+
+    - name: clone sunrise repository
+      command: git clone ~/sunrise.git ~/sunrise
+      args:
+        creates: ~/sunrise
+
+    - name: Try to do an initial build
+      ignore_errors: yes
+      command: ./gradlew assemble
+      args:
+        chdir: ~/sunrise
+
+    - name: Try to copy

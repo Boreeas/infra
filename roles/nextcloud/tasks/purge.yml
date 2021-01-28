@@ -20,5 +20,5 @@
     state: absent
 
 - name: disable vhost
-  command: a2dissite philae
+  command: a2dissite philae.boreeas.net
 

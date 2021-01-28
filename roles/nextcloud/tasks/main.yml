@@ -11,6 +11,8 @@
       - php-pgsql
       - php-apcu
       - php-fpm
+      - php-redis
+      - php-igbinary
     state: latest
 
 - name: hack a replacement for freetype-config
@@ -18,14 +20,6 @@
     src: freetype-config
     dest: /usr/sbin/freetype-config
     mode: u=rwx,g=rx,o=rx
-
-- name: install php and modules
-  become: yes
-  become_user: aur_builder
-  aur:
-    name:
-      - php-igbinary
-      - php-redis
 
 - name: enable php modules
   copy:
@@ -134,6 +128,24 @@
     mode: u=rwx,g-rwx,o-rwx
     recurse: yes
 
+- name: Make sure php-fpm servier override dir exists
+  file:
+    path: /etc/systemd/system/php-fpm.service.d
+    state: directory
+
+- name: Allow php-fpm to access nextcloud directories
+  copy:
+    src: fpm-override
+    dest: /etc/systemd/system/php-fpm.service.d/override.conf
+
+- name: Reload service files
+  command: systemctl daemon-reload
+
+- name: Restart php-fpm service
+  service:
+    name: php-fpm
+    state: restarted
+
 - name: create log directory
   file:
     path: /var/log/nextcloud
@@ -176,13 +188,14 @@
     nc_conf_aliases:
       - cloud.boreeas.net
 
-- name: disable theming
-  command: /usr/bin/runuser -u http -- /usr/bin/php /usr/share/webapps/nextcloud/occ app:disable theming
 
-- name: install dark theme
-  git:
-    repo: https://github.com/strangeglyph/nextcloud-breeze-dark.git
-    dest: /usr/share/webapps/nextcloud/themes/nextcloud-breeze-dark
+#- name: disable theming
+#  command: /usr/bin/runuser -u http -- /usr/bin/php /usr/share/webapps/nextcloud/occ app:disable theming
+
+#- name: install dark theme
+#  git:
+#    repo: https://github.com/strangeglyph/nextcloud-breeze-dark.git
+#    dest: /usr/share/webapps/nextcloud/themes/nextcloud-breeze-dark
 
 - name: configure nextcloud
   command: /usr/bin/runuser -u http -- /usr/bin/php /usr/share/webapps/nextcloud/occ config:import /etc/webapps/nextcloud/config/extra.json

@@ -5,5 +5,5 @@
     - include_role:
         name: minecraft
       vars:
-        forge_version: 1.12.2-14.23.5.2825
-        modpack_url: https://philae.boreeas.net/s/trcia5TWDAB9Mi7/download
+        forge_version: 1.12.2-14.23.5.2846
+        modpack_url: https://philae.boreeas.net/s/XfPGjd2Larc6PQX/download

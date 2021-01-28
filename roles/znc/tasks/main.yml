@@ -30,7 +30,7 @@
   pacman:
     name: znc-git
     state: absent
-  when: znc_force_rebuild
+  when: znc_force_rebuild|bool
 
 - name: install znc
   become: yes

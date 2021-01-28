@@ -170,22 +170,27 @@
         comment: "AUR manager"
         shell: /bin/nologin
         system: yes
+      tags: aur
 
     - name: enable passwordless pacman for aurman
       copy:
         src: "{{ playbook_dir }}/../files/sudo_aurman"
         dest: /etc/sudoers.d/999-aurman
+      tags: aur
 
-    - name: remove cower
+    - name: remove yay
       pacman:
-        name: cower
+        name: yay
         state: absent
+      tags: aur
 
     - name: setup aur pkg tool
       become: yes
       become_user: aur_builder
       aur:
         name: yay
+        use: makepkg
+      tags: aur
 
 
   handlers:

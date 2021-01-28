@@ -4,7 +4,7 @@ set -e
 # Find backup location
 LOCATION="$1"
 if [ "$LOCATION" == "" ]; then
-    LOCATION="/root/ncbackup"
+    LOCATION="/var/backup/ncbackup"
 fi
 
 echo "Backing up to $LOCATION"

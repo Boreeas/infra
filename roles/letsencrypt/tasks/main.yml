@@ -1,6 +1,6 @@
 ---
 - import_tasks: setup.yml
-  when: do_setup
+  when: do_setup|bool
 
 - import_tasks: request.yml
-  when: not do_setup
+  when: not do_setup|bool

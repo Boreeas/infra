@@ -6,15 +6,27 @@
     user: minecraft
     password: "{{ minecraft_user_pass }}"
     mail: mail@example.com
+
 - name: install dependencies
   pacman:
     pkg:
       - jre8-openjdk-headless
     state: installed
 
+- name: Stop server if running
+  systemd:
+    service: minecraft
+    state: stopped
+  ignore_errors: yes
+
 - become: yes
   become_user: minecraft
   block:
+    - name: remove old folder
+      file:
+        path: /home/minecraft/minecraft
+        state: absent
+
     - name: create folder
       file:
         path: /home/minecraft/minecraft
@@ -37,6 +49,7 @@
       get_url:
         url: "{{ modpack_url }}"
         dest: /home/minecraft/modpack.zip
+        force: yes
 
     - name: setup tmp dir
       file:
@@ -48,14 +61,6 @@
         src: /home/minecraft/modpack.zip
         dest: /home/minecraft/modpack
         remote_src: yes
-
-    - name: remove old files
-      file:
-        path: /home/minecraft/minecraft/{{ item }}
-        state: absent
-      with_items:
-        - config
-        - mods
 
     - name: move files
       shell: mv /home/minecraft/modpack/*/.minecraft/config /home/minecraft/modpack/*/.minecraft/mods /home/minecraft/minecraft
@@ -70,10 +75,20 @@
         src: eula.txt
         dest: /home/minecraft/minecraft/eula.txt
 
+    - name: set server properties
+      copy:
+        src: server.properties
+        dest: /home/minecraft/minecraft/server.properties
+
 - name: install service file
   copy:
     src: minecraft.service
     dest: /etc/systemd/system
+  register: systemd
+
+- name: Reload daemon
+  command: systemctl daemon-reload
+  when: systemd | changed
 
 - name: start & enable service
   service:
